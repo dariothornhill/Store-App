@@ -1,0 +1,6 @@
+<div class="product row" ng-controller="ListProductsController as store" ng-repeat="product in store.products">
+	<h3>{{ product.name }}</h3>
+	<img class="product-photo" ng-src="{{ product.photo }}" alt=""/>
+	<p>{{ product.price | currency }}</p>
+	<a href ng-click="store.showDetails(product.id)">Details</a>
+</div>

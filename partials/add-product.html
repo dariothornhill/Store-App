@@ -1,0 +1,23 @@
+<div class="ng-hide" ng-show="store.showForm">	
+	<form name="newProductForm" ng-submit="store.addProduct()">
+	    
+		<input ng-model="store.newProduct.name" type="text" placeholder="The Name of the thing"/>
+		<br/>		
+		<input ng-model="store.newProduct.price" type="number" pattern="^\d+(\.|\,)\d{2}$" placeholder="The Price of the thing"/>
+		<br/>
+		<input type="file" id="fileinput" />
+		<input ng-model="store.newProduct.photo" type="hidden" id="photo"/>
+		<br/>
+		<textarea ng-model="store.newProduct.description" placeholder="The description of the thing"></textarea>
+		<br/>
+		<input type="submit"/>
+		</fieldset>
+	</form>
+</div>
+<script>
+//Let's pretend we uploaded a file to the server validated et al and then put the path in the json object in node.js
+	document.getElementById('fileinput').addEventListener('change',function(){
+		var file = this.files[0];
+		document.getElementById('photo').value = file.name;
+	});
+</script>
