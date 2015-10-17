@@ -1,25 +1,46 @@
 (function(){
-var app = angular.module('Store',[]);
+var app = angular.module('Store',['ngRoute']);
 
 app.controller('StoreController', function(){
  this.products = items;
  this.showProducts = false;
  this.newProduct ={};
  this.detailedProduct = {};
- 
+ this.showDetailsFlag = false;
+ this.showForm = false;
+
  this.addProduct = function(){
  	this.products.push(this.newProduct);
  	this.newProduct.id = 4; //there is some function to generate a new id
+ 	this.showProducts();
+ 	this.newProduct = {};
  };
  this.browseProducts = function(){
+ 	this.detailedProduct = {}; 
  	this.showProducts = true;
+ 	this.showForm= false;
 
  };
  this.editProducts = function(){};
  this.removeProducts = function(){};
- 
+ this.showAddForm = function(){
+ 	this.showForm= true;
+ 	this.showProducts = false;
+
+ }; 
 
  this.showDetails = function(id){
+ 	var i = 0;
+ 	for(;i <this.products.length -1 ;i++){
+ 		if(this.products[i].id === id){
+ 			this.detailedProduct = this.products[i];
+ 		}
+ 		break;
+ 		this.showProducts = false;
+ 	    this.showForm= false;
+
+ 	}
+
 
  };
 

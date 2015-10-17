@@ -2,7 +2,10 @@
 <html ng-app="Store">
 <head>
    <title>The Store</title>
-   <script src="angular.js"></script>
+   <script src="bower_components/angular/angular.js"></script>
+   <script src="bower_components/angular-route/angular-route.js"></script>
+   <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+   <script src="bower_components/jquery/dist/jquery.js"></script>
    <script src="app.js"></script> 
    <style>
     img.product-photo{
@@ -17,24 +20,31 @@
 <nav>
 	<ul>
 		<li><a href ng-click="store.browseProducts()">Browse the things</a></li>
-		<li><a href ng-click="">Post a thing</a></li>
+		<li><a href ng-click="store.showAddForm()">Post a thing</a></li>
 	</ul>
 </nav>
 <div class="product row ng-hide" ng-repeat="product in store.products" ng-show="store.showProducts">
 	<h3>{{ product.name }}</h3>
 	<img class="product-photo" ng-src="{{ product.photo }}" alt=""/>
 	<p>{{ product.price | currency }}</p>
+	<a href ng-click="store.showDetails(product.id)">Details</a>
 </div>
-<product-details class="product details ng-hide" ng-show=""></product-details>
+<product-details class="product details ng-hide" ng-show="store.showDetailsFlag"></product-details>
 
-<div>	
+<div class="ng-hide" ng-show="store.showForm">	
 	<form name="newProductForm" ng-submit="store.addProduct()">
+	    
 		<input ng-model="store.newProduct.name" type="text" placeholder="The Name of the thing"/>
+		<br/>		
 		<input ng-model="store.newProduct.price" type="number" pattern="^\d+(\.|\,)\d{2}$" placeholder="The Price of the thing"/>
+		<br/>
 		<input type="file" id="fileinput" />
 		<input ng-model="store.newProduct.photo" type="hidden" id="photo"/>
+		<br/>
 		<textarea ng-model="store.newProduct.description" placeholder="The description of the thing"></textarea>
+		<br/>
 		<input type="submit"/>
+		</fieldset>
 	</form>
 </div>
 <script>
