@@ -1,11 +1,22 @@
 (function() {
     var app = angular.module('Store', ['ngRoute']);
 
-    app.factory("products", function() {
+    app.factory("productFactory", ["$q", "$timeout", function($q, $timeout) {
         this.products = {};
         this.products.list = items; /*Get from http.get*/
         this.products.add = function(product) {
-            this.list.push(product);
+            var self = this;
+            var deferred = $q.defer();
+            product.id = Math.random();
+            $timeout(function() {
+                self.list.push(product);
+                deferred.resolve({
+                    succes: true
+                });
+            }, 100);
+
+
+            return deferred.promise;
         };
         this.products.getAll = function() {
 
@@ -26,11 +37,10 @@
                 if (this.products.list[i].id === id) {
                     return this.products.list[i].id;
                 }
-                break;
             }
         };
         return this.products;
-    });
+    }]);
 
     app.controller('AppController', function() {
         this.products = items;
@@ -45,7 +55,8 @@
             }).
             when('/new', {
                 templateUrl: 'partials/add-product.html',
-                controller: 'NewProductController'
+                controller: 'NewProductController',
+                controllerAs: 'store'
             }).when('/:id/edit', {
                 templateUrl: 'partials/edit-.html',
                 controller: 'EditProductController'
@@ -60,21 +71,37 @@
         }
     ]);
 
-    app.controller('NewProductController', function(products) {
-
-    });
-
-    app.controller("ProductDetailsController", function(products) {
-
-    });
-
-    app.controller("ListProductsController", function(products) {
+    app.controller('NewProductController', ["$location", "productFactory", function($location, productFactory) {
         var self = this;
-        self.products = products.getAll();
+        self.newProduct = {};
+        self.addProduct = function() {
+            console.log("Products: ", productFactory);
+            console.log("newProduct: ", self.newProduct);
+            productFactory.add(self.newProduct).then(function(successResp) {
+                    $location.path("/list");
+                },
+                function(err) {
+                    console.log("Error: ", err);
+
+                });
+
+
+        };
+
+
+    }]);
+
+    app.controller("ProductDetailsController", function(productFactory) {
 
     });
 
-    app.controller("EditProductController", function(products) {
+    app.controller("ListProductsController", function(productFactory) {
+        var self = this;
+        self.products = productFactory.getAll();
+
+    });
+
+    app.controller("EditProductController", function(productFactory) {
 
     });
 
