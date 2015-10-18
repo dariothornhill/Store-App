@@ -1,7 +1,7 @@
 (function() {
     var app = angular.module('Store', ['ngRoute']);
 
-    app.factory("productFactory", ["$q", "$timeout", function($q, $timeout) {
+    app.factory("productFactory", function($q, $timeout) {
         this.products = {};
         this.products.list = items; /*Get from http.get*/
         this.products.add = function(product) {
@@ -40,7 +40,7 @@
             }
         };
         return this.products;
-    }]);
+    });
 
     app.controller('AppController', function() {
         this.products = items;
@@ -53,7 +53,7 @@
                 templateUrl: 'partials/list-products.html',
                 controller: 'ListProductsController'
             }).
-            when('/new', {
+            when('/:id/new', {
                 templateUrl: 'partials/add-product.html',
                 controller: 'NewProductController',
                 controllerAs: 'store'
@@ -71,7 +71,7 @@
         }
     ]);
 
-    app.controller('NewProductController', ["$location", "productFactory", function($location, productFactory) {
+    app.controller('NewProductController', function($location, productFactory) {
         var self = this;
         self.newProduct = {};
         self.addProduct = function() {
@@ -89,7 +89,7 @@
         };
 
 
-    }]);
+    });
 
     app.controller("ProductDetailsController", function(productFactory) {
 

@@ -2,5 +2,5 @@
 	<h3>{{ product.name }}</h3>
 	<img class="product-photo" ng-src="{{ product.photo }}" alt=""/>
 	<p>{{ product.price | currency }}</p>
-	<a href ng-click="store.showDetails(product.id)">Details</a>
+	<a ng-href="#/{{ product.id }}/show">Details</a>
 </div>
