@@ -1,7 +1,7 @@
  <div class="product details">
- <h3>{{ product.name }}</h3>
-	<img class="product-photo" ng-src="{{ product.photo }}" alt=""/>
-	<p>{{ product.price | currency }}</p>
-	<p> {{ product.description }}</p>
+ <h3>{{ store.product.name }}</h3>
+	<img class="product-photo" ng-src="{{ store.product.photo }}" alt=""/>
+	<p>{{ store.product.price | currency }}</p>
+	<p> {{ store.product.description }}</p>
 	<a href ng-href="#/list">Back to products</a>
 	</div>

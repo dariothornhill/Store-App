@@ -7,77 +7,115 @@
         this.products.add = function(product) {
             var self = this;
             var deferred = $q.defer();
-            product.id = Math.random();
+            product.id = Math.floor((Math.random() * 10000) + 10);
+
             $timeout(function() {
                 self.list.push(product);
                 deferred.resolve({
-                    succes: true
+                    success: "Add a product with id: " + product.id
                 });
             }, 100);
 
 
             return deferred.promise;
         };
-        this.products.getAll = function() {
 
-            return this.list;
+        this.products.save = function(product) {
+            var self = this;
+            var i = 0;
+            var deferred = $q.defer();
+            for (; i < self.list.length; i++) {
+                if (self.list[i].id == product.id) {
+                    self.list[i] = product;
+                    deferred.resolve({
+                        success: "Saved a product with id: " + product.id
+                    });
+                    return deferred.promise;
+                }
+            }
+            deferred.reject({
+                error: "Item not found, can't edit"
+            });
+            return deferred.promise;
         };
-        this.products.remove = function($id) {
-            var i = 0;
-            for (; i < this.products.list.length - 1; i++) {
-                if (this.products.list[i].id === id) {
-                    delete this.products.list[i].id;
-                }
-                break;
+
+        this.products.getAll = function() {
+            var deferred = $q.defer();
+            var self = this;
+            if (self.list.length != 0) {
+                deferred.resolve(self.list);
+            } else {
+                deferred.reject("No products to list");
             }
+
+            return deferred.promise;
+        };
+        this.products.remove = function(id) {
+            var i = 0;
+            var self = this;
+            var deferred = $q.defer();
+            console.log("Old list: ",self.list);
+            for (; i < self.list.length; i++) {
+                if (self.list[i].id == id) {
+                    self.list.splice(i,1);
+                    console.log("New list: ",self.list);
+                    deferred.resolve({
+                        success: "Deleted Item"
+                    });
+                    return deferred.promise;
+                }
+            }
+            deferred.reject({
+                error: "Item not found! No deletion was possible"
+            });
+            return deferred.promise;
         }
-        this.products.show = function($id) {
+        this.products.show = function(id) {
             var i = 0;
-            for (; i < this.products.list.length - 1; i++) {
-                if (this.products.list[i].id === id) {
-                    return this.products.list[i].id;
+            var deferred = $q.defer();
+            var self = this;
+
+            $timeout(function() {
+                for (; i < self.list.length; i++) {
+                    if (self.list[i].id == id) {
+                        deferred.resolve(self.list[i]);
+                        return;
+                    }
                 }
-            }
+                deferred.reject({
+                    reason: "No such item exists"
+                });
+            }, 0);
+
+            return deferred.promise;
+        };
+
+        this.products.fail = function(reason) {
+            var deferred = $q.defer();
+            $timeout(deferred.reject(reason), 2000);
+            return deferred.promise;
         };
         return this.products;
     });
 
-    app.controller('AppController', function() {
-        this.products = items;
+    app.controller('AppController', function($rootScope, $location, $scope) {
+        $scope.upload = function() {
+
+        };
+        $rootScope.$on("$routeChangeError", function(event, current, previous, eventObj) {
+            alert(eventObj);
+            $location.path(previous);
+        });
     });
 
-    app.config(['$routeProvider',
-        function($routeProvider) {
-            $routeProvider.
-            when('/list', {
-                templateUrl: 'partials/list-products.html',
-                controller: 'ListProductsController'
-            }).
-            when('/:id/new', {
-                templateUrl: 'partials/add-product.html',
-                controller: 'NewProductController',
-                controllerAs: 'store'
-            }).when('/:id/edit', {
-                templateUrl: 'partials/edit-.html',
-                controller: 'EditProductController'
-            }).
-            when('/:id/show', {
-                templateUrl: 'partials/product-details.html',
-                controller: 'ProductDetailsController'
-            }).
-            otherwise({
-                redirectTo: '/list'
-            });
-        }
-    ]);
-
-    app.controller('NewProductController', function($location, productFactory) {
+    app.controller('NewProductController', function($location, productFactory, $scope) {
         var self = this;
         self.newProduct = {};
+
+
         self.addProduct = function() {
-            console.log("Products: ", productFactory);
-            console.log("newProduct: ", self.newProduct);
-            productFactory.add(self.newProduct).then(function(successResp) {
+            console.log("Product to add:", self.newProduct);
+            productFactory.add(self.newProduct).then(function(success) {
                     $location.path("/list");
                 },
                 function(err) {
@@ -91,19 +129,88 @@
 
     });
 
-    app.controller("ProductDetailsController", function(productFactory) {
-
+    app.controller("ProductDetailsController", function(product) {
+        var self = this;
+        self.product = product;
     });
 
     app.controller("ListProductsController", function(productFactory) {
         var self = this;
-        self.products = productFactory.getAll();
+        productFactory.getAll().then(function(listedProducts) {
+                self.products = listedProducts;
+            },
+            function(reason) {
+                console.log("Reason");
+            });
+    });
+
+    app.controller("EditProductController", function(product, productFactory,$location) {
+        var self = this;
+        self.newProduct = product;
+        self.saveProduct = function() {
+            productFactory.save(self.newProduct).then($location.path("/list"));
+
+        };
+        self.deleteProduct = function() {
+            console.log(self.newProduct.id);
+            productFactory.remove(self.newProduct.id).then($location.path("/list"));
+
+        };
 
     });
 
-    app.controller("EditProductController", function(productFactory) {
+    app.config(['$routeProvider',
+        function($routeProvider) {
+            $routeProvider.
+            when('/list', {
+                templateUrl: 'partials/list-products.html',
+                controller: 'ListProductsController',
+                controllerAs: 'store',
+                resolve: {
+                    product: function(productFactory) {
+                        return productFactory.getAll();
+                    }
+                }
+            }).
+            when('/new', {
+                templateUrl: 'partials/add-product.html',
+                controller: 'NewProductController',
+                controllerAs: 'store'
+            }).when('/:id/edit', {
+                templateUrl: 'partials/edit-product.html',
+                controller: 'EditProductController',
+                controllerAs: 'store',
+                resolve: {
+                    product: function(productFactory, $route) {
+                        return productFactory.show($route.current.params.id);
+                    }
+                }
+            }).
+            when('/:id/show', {
+                templateUrl: 'partials/product-details.html',
+                controller: 'ProductDetailsController',
+                controllerAs: 'store',
+                resolve: {
+                    product: function(productFactory, $route) {
+                        return productFactory.show($route.current.params.id);
+                    }
+                }
+            }).
+            when('/fail', {
+                templateUrl: 'partials/product-details.html',
+                controller: 'ProductDetailsController',
+                resolve: {
+                    failure: function(productFactory) {
 
-    });
+                        return productFactory.fail("This doesn't work!");
+                    }
+                }
+            }).
+            otherwise({
+                redirectTo: '/list'
+            });
+        }
+    ]);
 
     var items = [{
         id: 1,

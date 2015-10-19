@@ -1,5 +1,5 @@
 <div>
-	<form name="newProductForm" ng-submit="store.editProduct()">
+	<form name="newProductForm" ng-submit="store.saveProduct()">
 	    
 		<input ng-model="store.newProduct.name" type="text" placeholder="The Name of the thing"/>
 		<br/>		
@@ -10,8 +10,8 @@
 		<br/>
 		<textarea ng-model="store.newProduct.description" placeholder="The description of the thing"></textarea>
 		<br/>
-		<input type="submit"/>
-		</fieldset>
+		<input type="submit" value="Save"/><button type="button" class="btn btn-danger" ng-click="store.deleteProduct();">Delete</button>
+		
 	</form>
 </div>
 <script>
